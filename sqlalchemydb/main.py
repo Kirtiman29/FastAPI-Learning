@@ -42,8 +42,39 @@ def get_db():
 
 
 
-@app.get("/")
-def home(db: Session = Depends(get_db)):
+@app.post("/todos")
+def create_todo(title:str,db:Session =Depends(get_db)):
+    todo = Todo(title = title, completed = "False")
+    db.add(todo)
+    db.commit()
+    db.refresh(todo)
     return {
-        "message" : "DB connected fine"
+        "messsage" : "Todo Created",
+        "data": todo
     }
+
+
+@app.get("/todos")
+def get_todos(db: Session = Depends(get_db)):
+    todos = db.query(Todo).all()
+    return {
+        "message" : "Todo Fetched",
+        "data" : todos
+    }
+
+@app.get("/todos/{todo_id}")
+def get_todos_by_id(todo_id : int, db:Session = Depends(get_db)):
+    todo = db.query(Todo).filter(Todo.id == todo_id).first()
+
+    if not todo:
+        return {
+            "message" : "Todo Not Found"
+        
+            }
+    return {
+        "message" : "Todo Fetched",
+        "data" : todo
+    }
+
+
+ 
